@@ -1,28 +1,15 @@
 Question 1
--- Original ProductDetail table with multivalued 'Products' column (violates 1NF)
+-- Creating a table that violates 1NF due to multivalued Products
 CREATE TABLE ProductDetail (
     OrderID INT,
     CustomerName VARCHAR(100),
-    Products VARCHAR(255)
+    Products VARCHAR(100) -- Contains one product per row (flattened for simplicity)
 );
 
--- Inserting sample data with multiple products in one field
-INSERT INTO ProductDetail (OrderID, CustomerName, Products) VALUES
-(101, 'kea Smith', 'Laptop, Mouse'),
-(102, 'Linky VanRooyen', 'Tablet, Keyboard, Mouse'),
-(103, 'Boitumelo VanWyk', 'Phone');
-
-
--- Transformed table where each product is a separate row (1NF-compliant)
-CREATE TABLE ProductDetail_1NF (
-    OrderID INT,
-    CustomerName VARCHAR(100),
-    Product VARCHAR(100)
-);
-
--- Inserting normalized data: one product per row
-INSERT INTO ProductDetail_1NF (OrderID, CustomerName, Product) VALUES
-(101, 'kea Smith', 'Laptop'),
+-- Inserting product data; each product is now a separate row for 1NF compliance
+INSERT INTO ProductDetail (OrderID, CustomerName, Products)
+VALUES
+(101, 'Kea Smith', 'Laptop'),
 (101, 'Kea Smith', 'Mouse'),
 (102, 'Linky VanRooyen', 'Tablet'),
 (102, 'Linky VanRooyen', 'Keyboard'),
@@ -30,27 +17,23 @@ INSERT INTO ProductDetail_1NF (OrderID, CustomerName, Product) VALUES
 (103, 'Boitumelo VanWyk', 'Phone');
 
 Question 2
--- Original OrderDetails table with partial dependency: CustomerName depends only on OrderID
-CREATE TABLE OrderDetails (
-    OrderID INT,
-    CustomerName VARCHAR(100),
-    Product VARCHAR(100),
-    Quantity INT
+-- Creating the Orders table with OrderID as the primary key
+-- CustomerName depends entirely on OrderID, fixing the partial dependency issue
+CREATE TABLE Orders (
+    OrderID INT PRIMARY KEY,
+    CustomerName VARCHAR(100)
 );
 
--- Inserting sample data showing partial dependency
-INSERT INTO OrderDetails (OrderID, CustomerName, Product, Quantity) VALUES
-(101, 'kea Smith', 'Laptop', 2),
-(101, 'Kea Smith', 'Mouse', 1),
-(102, 'Linky VanRooyen', 'Tablet', 3),
-(102, 'Linky VanRooyen', 'Keyboard', 1),
-(102, 'Linky VanRooyen', 'Mouse', 2),
-(103, 'Boitumelo VanWyk', 'Phone', 1);
+-- Inserting unique orders with associated customer names
+INSERT INTO Orders (OrderID, CustomerName)
+VALUES
+(101, 'Kea Smith'),
+(102, 'Linky VanRooyen'),
+(103, 'Boitumelo VanWyk');
 
-
--- OrderItems table stores product and quantity per order
--- Fully depends on both OrderID and Product (no partial dependency)
-CREATE TABLE OrderItems (
+-- Creating the Product table with a composite primary key (OrderID, Product)
+-- Each product entry is tied to a specific order, and quantity is fully dependent on both
+CREATE TABLE Product (
     OrderID INT,
     Product VARCHAR(100),
     Quantity INT,
@@ -58,14 +41,16 @@ CREATE TABLE OrderItems (
     FOREIGN KEY (OrderID) REFERENCES Orders(OrderID)
 );
 
--- Inserting product info for each order
-INSERT INTO OrderItems (OrderID, Product, Quantity) VALUES
+-- Inserting detailed product and quantity data per order
+INSERT INTO Product (OrderID, Product, Quantity)
+VALUES
 (101, 'Laptop', 2),
 (101, 'Mouse', 1),
 (102, 'Tablet', 3),
 (102, 'Keyboard', 1),
 (102, 'Mouse', 2),
 (103, 'Phone', 1);
+
 
 
 
